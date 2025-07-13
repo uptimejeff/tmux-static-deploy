@@ -62,7 +62,7 @@ fi
 # Add the installation directory to /etc/paths if it's not already there
 if ! grep -q "^$BIN_DIR$" /etc/paths; then
   echo "Adding $BIN_DIR to /etc/paths"
-  echo "$BIN_DIR" | sudo tee -a /etc/paths
+  echo "$BIN_DIR" | tee -a /etc/paths
 fi
 
 echo "✅ tmux installation complete."
