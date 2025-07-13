@@ -8,7 +8,7 @@ EXPECTED_VERSION="3.5a"
 DOWNLOAD_URL="https://github.com/uptimejeff/tmux-static-deploy/releases/download/v1.1.0/tmux-macos-portable.tar.gz"
 
 # Create the installation directory
-mkdir -p "$BIN_DIR"
+mkdir -p "$BIN_DIR" "/usr/local/macadmin/share"
 
 # Check if tmux is already installed and at the correct version
 if [[ -x "$TMUX_BIN" ]] && "$TMUX_BIN" -V | grep -q "$EXPECTED_VERSION"; then
@@ -18,10 +18,24 @@ fi
 
 # Download and install tmux
 echo "Downloading tmux..."
-curl -fsSL "$DOWNLOAD_URL" -o /tmp/tmux.tar.gz
-tar -xzf /tmp/tmux.tar.gz -C "$BIN_DIR"
+
+# Create a temporary directory for extraction
+TMP_DIR=$(mktemp -d)
+
+# Download and extract the archive
+curl -fsSL "$DOWNLOAD_URL" -o "$TMP_DIR/tmux.tar.gz"
+tar -xzf "$TMP_DIR/tmux.tar.gz" -C "$TMP_DIR"
+
+# Move the contents to the final destination
+# This handles the nested directory structure
+mv "$TMP_DIR"/bin/* "$BIN_DIR/"
+mv "$TMP_DIR"/share/* "/usr/local/macadmin/share/"
+
+# Set executable permissions
 chmod +x "$TMUX_BIN"
-rm /tmp/tmux.tar.gz
+
+# Clean up the temporary directory
+rm -rf "$TMP_DIR"
 
 # Validate the installation
 if "$TMUX_BIN" -V | grep -q "$EXPECTED_VERSION"; then
