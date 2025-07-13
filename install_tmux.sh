@@ -3,12 +3,13 @@
 set -euo pipefail
 
 BIN_DIR="/usr/local/macadmin/bin"
+SHARE_DIR="/usr/local/macadmin/share"
 TMUX_BIN="$BIN_DIR/tmux"
 EXPECTED_VERSION="3.5a"
 DOWNLOAD_URL="https://github.com/uptimejeff/tmux-static-deploy/releases/download/v1.1.0/tmux-macos-portable.tar.gz"
 
-# Create the installation directory
-mkdir -p "$BIN_DIR" "/usr/local/macadmin/share"
+# Create the installation directories
+mkdir -p "$BIN_DIR" "$SHARE_DIR"
 
 # Check if tmux is already installed and at the correct version
 if [[ -x "$TMUX_BIN" ]] && "$TMUX_BIN" -V | grep -q "$EXPECTED_VERSION"; then
@@ -19,23 +20,40 @@ fi
 # Download and install tmux
 echo "Downloading tmux..."
 
-# Create a temporary directory for extraction
+# Create a temporary directory for extraction and ensure it's cleaned up on exit
 TMP_DIR=$(mktemp -d)
+trap 'rm -rf "$TMP_DIR"' EXIT
 
 # Download and extract the archive
 curl -fsSL "$DOWNLOAD_URL" -o "$TMP_DIR/tmux.tar.gz"
 tar -xzf "$TMP_DIR/tmux.tar.gz" -C "$TMP_DIR"
 
-# Move the contents to the final destination
-# This handles the nested directory structure
-mv "$TMP_DIR"/bin/* "$BIN_DIR/"
-mv "$TMP_DIR"/share/* "/usr/local/macadmin/share/"
+# --- START DEBUG INFO ---
+echo "[DEBUG] Temporary directory: $TMP_DIR"
+echo "[DEBUG] Contents of temp dir after extraction:"
+ls -lR "$TMP_DIR"
+echo "--- END DEBUG INFO ---"
+
+# Check for and move contents of bin directory
+if [ -d "$TMP_DIR/bin" ]; then
+  echo "[DEBUG] Moving files from $TMP_DIR/bin to $BIN_DIR"
+  mv "$TMP_DIR"/bin/* "$BIN_DIR/"
+else
+  echo "❌ ERROR: Extracted archive does not contain a 'bin' directory at the expected path."
+  exit 1
+fi
+
+# Check for and move contents of share directory
+if [ -d "$TMP_DIR/share" ]; then
+  echo "[DEBUG] Moving files from $TMP_DIR/share to $SHARE_DIR"
+  mv "$TMP_DIR"/share/* "$SHARE_DIR/"
+else
+  echo "❌ ERROR: Extracted archive does not contain a 'share' directory at the expected path."
+  exit 1
+fi
 
 # Set executable permissions
 chmod +x "$TMUX_BIN"
-
-# Clean up the temporary directory
-rm -rf "$TMP_DIR"
 
 # Validate the installation
 if "$TMUX_BIN" -V | grep -q "$EXPECTED_VERSION"; then
