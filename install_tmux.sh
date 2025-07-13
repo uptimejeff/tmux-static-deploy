@@ -28,15 +28,11 @@ trap 'rm -rf "$TMP_DIR"' EXIT
 curl -fsSL "$DOWNLOAD_URL" -o "$TMP_DIR/tmux.tar.gz"
 tar -xzf "$TMP_DIR/tmux.tar.gz" -C "$TMP_DIR"
 
-# --- START DEBUG INFO ---
-echo "[DEBUG] Temporary directory: $TMP_DIR"
-echo "[DEBUG] Contents of temp dir after extraction:"
-ls -lR "$TMP_DIR"
-echo "--- END DEBUG INFO ---"
+
 
 # Check for and move contents of bin directory
 if [ -d "$TMP_DIR/bin" ]; then
-  echo "[DEBUG] Moving files from $TMP_DIR/bin to $BIN_DIR"
+  echo "Moving files from $TMP_DIR/bin to $BIN_DIR"
   mv "$TMP_DIR"/bin/* "$BIN_DIR/"
 else
   echo "❌ ERROR: Extracted archive does not contain a 'bin' directory at the expected path."
@@ -45,7 +41,7 @@ fi
 
 # Check for and move contents of share directory
 if [ -d "$TMP_DIR/share" ]; then
-  echo "[DEBUG] Moving files from $TMP_DIR/share to $SHARE_DIR"
+  echo "Moving files from $TMP_DIR/share to $SHARE_DIR"
   mv "$TMP_DIR"/share/* "$SHARE_DIR/"
 else
   echo "❌ ERROR: Extracted archive does not contain a 'share' directory at the expected path."
