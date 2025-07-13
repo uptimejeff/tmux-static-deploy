@@ -5,7 +5,7 @@ set -euo pipefail
 BIN_DIR="/usr/local/macadmin/bin"
 TMUX_BIN="$BIN_DIR/tmux"
 EXPECTED_VERSION="3.5a"
-DOWNLOAD_URL="https://example.com/tmux-macos.tar.gz" # <-- Replace with your actual URL
+DOWNLOAD_URL="https://github.com/uptimejeff/tmux-static-deploy/releases/download/v1.0.0/tmux-macos.tar.gz"
 
 # Create the installation directory
 mkdir -p "$BIN_DIR"
